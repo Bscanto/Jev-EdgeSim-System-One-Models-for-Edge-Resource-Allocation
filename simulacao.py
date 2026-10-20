@@ -1,6 +1,5 @@
 
 from pathlib import Path
-
 from dotenv import load_dotenv
 from edge_sim_py import Simulator, Service, EdgeServer
 from politica_jev import PoliticaJev
@@ -8,12 +7,14 @@ from politica_jev import PoliticaJev
 load_dotenv()
 
 politica = PoliticaJev()
+dataset = Path("dataset_jev.json")
 
+# Política executada pelo EdgeSimPy
 def algoritmo_jev(parameters):
     """Política executada a cada passo do EdgeSimPy."""
 
     for servico in Service.all():
-        if servico.server is not None:
+        if servico.server is not None or servico.being_provisioned:
             continue
 
         # Evita repetir pedidos de provisionamento
@@ -64,7 +65,8 @@ if not pendentes:
     all(s.server is not None for s in Service.all())
     or model.schedule.steps >= 100
 )
-    
+ 
+"""  
 print("\n===== ESTADO INICIAL =====")
 
 for servico in Service.all():
@@ -85,8 +87,13 @@ for servidor in EdgeServer.all():
         f"CPU: {servidor.cpu_demand}/{servidor.cpu} | "
         f"RAM: {servidor.memory_demand}/{servidor.memory}"
     )
+"""
+    
+    
+# Executar simulação
 simulador.run_model()
 
+# Mostrar resultados
 print("\n===== RESULTADOS =====")
 
 for servico in Service.all():

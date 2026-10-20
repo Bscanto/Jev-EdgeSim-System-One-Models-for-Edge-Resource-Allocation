@@ -4,14 +4,15 @@ from langchain_typesafe import TypeSafeClassifier, Choice
 
 class PoliticaJev:
     def __init__(self):
-        self.chamadas_api = 0
-        self.tempo_total_api = 0.0
         self.modelo = TypeSafeClassifier()
         self.decisoes = []
+        self.chamadas_api = 0
+        self.tempo_total_api = 0.0
 
     def selecionar_servidor(self, servico, servidores):
         """Seleciona um servidor viável usando Jev."""
-
+        
+        # Filtrar servidores com CPU e RAM suficientes
         candidatos = []
 
         for servidor in servidores:
@@ -19,7 +20,7 @@ class PoliticaJev:
             ram_livre = servidor.memory - servidor.memory_demand
 
             if (
-                cpu_livre >= servico.cpu_demand
+                cpu_livre >= servico.cpu_demand 
                 and ram_livre >= servico.memory_demand
             ):
                 candidatos.append({
@@ -32,7 +33,7 @@ class PoliticaJev:
             print("Nenhum servidor possui recursos suficientes.")
             return None
 
-        # Apenas um candidato: decisão determinística
+        # Se existe apenas um servidor, não precisa consultar o Jev
         if len(candidatos) == 1:
             escolhido = candidatos[0]["id"]
         else:
@@ -62,7 +63,7 @@ class PoliticaJev:
                             "para alocar o serviço, considerando "
                             "o equilíbrio do uso de CPU e memória."
                         ),
-                        criteria=opcoes
+                        criteria = opcoes
                     )
                 }
             })
@@ -81,6 +82,7 @@ class PoliticaJev:
             print(f"Probabilidades: {resposta.probabilities}")
             escolhido = resultado.choices["servidor"].choice
 
+       # Recuperar o servidor selecionado
         servidor_escolhido = next(
             (s for s in servidores if str(s.id) == escolhido),
             None
