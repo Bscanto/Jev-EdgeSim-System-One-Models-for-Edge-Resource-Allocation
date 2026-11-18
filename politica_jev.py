@@ -80,7 +80,6 @@ class PoliticaJev:
             print(f"Confiança: {resposta.confidence:.2%}")
             print(f"Tempo de API: {tempo * 1000:.2f} ms")
             print(f"Probabilidades: {resposta.probabilities}")
-            escolhido = resultado.choices["servidor"].choice
 
        # Recuperar o servidor selecionado
         servidor_escolhido = next(

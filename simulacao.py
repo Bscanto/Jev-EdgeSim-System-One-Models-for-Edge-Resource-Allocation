@@ -31,7 +31,6 @@ def algoritmo_jev(parameters):
                     f"Servidor {servidor.id}"
                 )
 
-dataset = Path("dataset_jev.json")
 
 if not dataset.exists():
     raise FileNotFoundError(
@@ -43,9 +42,9 @@ simulador = Simulator(
     tick_duration=1,
     tick_unit="seconds",
     resource_management_algorithm=algoritmo_jev,
-    stopping_criterion=lambda model: all(
-        servico.server is not None
-        for servico in Service.all()
+    stopping_criterion=lambda model: (
+        all(s.server is not None for s in Service.all())
+        or model.schedule.steps >= 100
     )
 )
 
@@ -61,11 +60,7 @@ if not pendentes:
     raise RuntimeError(
         "O dataset não possui serviços pendentes."
     )
-    stopping_criterion=lambda model: (
-    all(s.server is not None for s in Service.all())
-    or model.schedule.steps >= 100
-)
- 
+
 """  
 print("\n===== ESTADO INICIAL =====")
 
