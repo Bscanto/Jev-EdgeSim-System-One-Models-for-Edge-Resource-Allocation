@@ -1,0 +1,17 @@
+[project]
+name = "jev-edgesimpy"
+version = "0.1.0"
+description = "JEV (System One Model) + EdgeSimPy para alocação de recursos na borda"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "edge-sim-py",
+    "langchain-typesafe",
+    "python-dotenv",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+edge-sim-py = { git = "https://github.com/EdgeSimPy/EdgeSimPy" }

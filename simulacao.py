@@ -4,14 +4,13 @@ from dotenv import load_dotenv
 from edge_sim_py import Simulator, Service, EdgeServer
 
 from politica_jev import PoliticaJev
-#from politica_least_loaded import PoliticaLeastLoaded
 
 
 
 load_dotenv()
 
 politica = PoliticaJev()
-#politica = PoliticaLeastLoaded()
+
 dataset = Path("dataset_jev.json")
 
 # Política executada pelo EdgeSimPy

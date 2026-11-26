@@ -13,6 +13,10 @@ Projeto experimental que integra o modelo de inteligência artificial JEV (Syste
 | `politica_least_loaded.py` | Escolha local pelo maior volume de recursos livres. |
 | `simulacao.py` | Configuração do simulador, provisionamento e apresentação dos resultados. |
 | `logs/` | Registros da simulação em formato `.msgpack`. |
+| `pyproject.toml` | Dependências do projeto e versão mínima do Python. |
+| `uv.lock` | Versões exatas de todas as dependências, para reproduzir o ambiente. |
+| `.python-version` | Versão do Python usada pelo `uv` (3.14). |
+| `.env` | Credenciais locais (`TYPESAFE_API_KEY`). Não é versionado. |
 
 Os datasets descrevem componentes por meio de `attributes` (propriedades, capacidades e demandas) e `relationships` (referências entre serviços, servidores e demais componentes).
 
@@ -60,28 +64,55 @@ Essa política não faz chamadas à API. O critério usa recursos livres absolut
 
 ## Preparação do ambiente
 
-Utilize um ambiente Python com as dependências correspondentes aos módulos importados pelos scripts:
+O projeto usa o [uv](https://docs.astral.sh/uv/) para gerenciar o Python e as dependências. A versão do Python (3.14) está fixada em `.python-version`, e as versões exatas das bibliotecas estão em `uv.lock`.
 
-| Módulo | Uso |
-| --- | --- |
-| `edge_sim_py` | Simulador e componentes da infraestrutura. |
-| `dotenv` (pacote `python-dotenv`) | Carregamento de variáveis de ambiente a partir de `.env`. |
-| `langchain_typesafe` | `TypeSafeClassifier` e `Choice`, utilizados pela política JEV. |
+### Requisitos
 
-O repositório não possui um manifesto de dependências com versões fixadas. Instale as dependências conforme a configuração das bibliotecas utilizadas no seu ambiente.
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) instalado (`brew install uv` no macOS).
+- `git`, pois o EdgeSimPy é instalado diretamente do [repositório oficial](https://github.com/EdgeSimPy/EdgeSimPy).
 
-Para usar JEV, configure as credenciais exigidas pela sua instalação de `langchain_typesafe` no ambiente ou em um arquivo `.env`. O script chama `load_dotenv()` antes de instanciar a política; os nomes das variáveis e a configuração do provedor não estão definidos nos scripts deste projeto. Não versione credenciais.
+O `uv` baixa o Python 3.14 automaticamente se ele não estiver instalado.
+
+### Dependências
+
+| Pacote | Módulo | Uso |
+| --- | --- | --- |
+| `edge-sim-py` | `edge_sim_py` | Simulador e componentes da infraestrutura. |
+| `python-dotenv` | `dotenv` | Carregamento de variáveis de ambiente a partir de `.env`. |
+| `langchain-typesafe` | `langchain_typesafe` | `TypeSafeClassifier` e `Choice`, utilizados pela política JEV. |
+
+### Instalação
+
+Na raiz do projeto:
+
+```bash
+uv sync
+```
+
+O comando cria o ambiente virtual em `.venv/` e instala exatamente as versões registradas em `uv.lock`. Repita-o após um `git pull` que altere as dependências.
+
+Para adicionar ou remover dependências, use `uv add <pacote>` e `uv remove <pacote>`; ambos atualizam `pyproject.toml` e `uv.lock`, que devem ser versionados.
+
+### Credenciais
+
+A política JEV exige a chave da API do TypeSafe. Crie um arquivo `.env` na raiz do projeto:
+
+```bash
+echo 'TYPESAFE_API_KEY=sua_chave_aqui' > .env
+```
+
+O script chama `load_dotenv()` antes de instanciar a política. O `.env` está no `.gitignore` e não deve ser versionado; recrie-o sempre que clonar o repositório. A política Least Loaded não precisa de credenciais.
 
 ## Execução
 
-Execute os comandos na raiz do projeto, pois os caminhos dos datasets são relativos ao diretório de execução.
+Execute os comandos na raiz do projeto, pois os caminhos dos datasets são relativos ao diretório de execução. O `uv run` usa automaticamente o ambiente do projeto, sem necessidade de ativá-lo.
 
 ### 1. Preparar os dados
 
 Garanta que `sample_dataset.json` contém um cenário válido do EdgeSimPy e execute:
 
 ```bash
-python preparar_dataset.py
+uv run preparar_dataset.py
 ```
 
 O script gera `dataset_jev.json` com todos os serviços sem servidor associado. Ele interrompe a preparação se encontrar um servidor referenciado inexistente ou se a liberação resultar em consumo negativo de CPU ou memória.
@@ -111,7 +142,7 @@ Deixe apenas uma instanciação ativa. Remover o import de JEV permite executar 
 ### 3. Executar a simulação
 
 ```bash
-python simulacao.py
+uv run simulacao.py
 ```
 
 Para comparar as políticas, execute cada uma separadamente usando o mesmo dataset preparado e guarde os resultados de cada execução.
